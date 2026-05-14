@@ -412,7 +412,7 @@ ruff check src tests training/src training/tests
 ## Publishing Checklist
 
 Before pushing to GitHub, make sure generated assets and private/local files are
-not staged.
+not staged. This is to avoid pushing large training data sets and your trained models, Enjoy and please upvote and star!
 
 Common paths to keep out of source control:
 
