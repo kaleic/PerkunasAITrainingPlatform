@@ -1,0 +1,168 @@
+{
+  "models": [
+    {
+      "model_id": "dev/kv-echo-chat",
+      "task_type": "generate",
+      "backend": "dev",
+      "backend_config": {},
+      "quantization_mode": "int8",
+      "kv_compression_mode": "turboquant",
+      "kv_required": true,
+      "max_context": 8192,
+      "streaming_supported": true,
+      "chat_template_required": true,
+      "hardware_constraints": {
+        "min_gpu_memory_gb": 0,
+        "supports_fp8_kv": false,
+        "requires_cuda": false
+      },
+      "policy_mode": "balanced"
+    },
+    {
+      "model_id": "dev/kv-embed",
+      "task_type": "embed",
+      "backend": "dev",
+      "backend_config": {
+        "dimension": 384
+      },
+      "quantization_mode": "int8",
+      "kv_compression_mode": "standard",
+      "kv_required": false,
+      "max_context": 512,
+      "streaming_supported": false,
+      "chat_template_required": false,
+      "hardware_constraints": {
+        "min_gpu_memory_gb": 0,
+        "supports_fp8_kv": false,
+        "requires_cuda": false
+      },
+      "policy_mode": "balanced"
+    },
+    {
+      "model_id": "dev/kv-rerank",
+      "task_type": "rerank",
+      "backend": "dev",
+      "backend_config": {},
+      "quantization_mode": "int8",
+      "kv_compression_mode": "standard",
+      "kv_required": false,
+      "max_context": 2048,
+      "streaming_supported": false,
+      "chat_template_required": false,
+      "hardware_constraints": {
+        "min_gpu_memory_gb": 0,
+        "supports_fp8_kv": false,
+        "requires_cuda": false
+      },
+      "policy_mode": "balanced"
+    },
+    {
+      "model_id": "perkunas/perkunas-3050-pilot",
+      "task_type": "generate",
+      "backend": "perkunas",
+      "backend_config": {
+        "model_name_or_path": "training/artifacts/perkunas_3050_pilot",
+        "device": "cuda:0",
+        "max_context": 256,
+        "top_k": 50,
+        "force_unoptimized_kv": true
+      },
+      "quantization_mode": "fp16",
+      "kv_compression_mode": "turboquant",
+      "kv_required": true,
+      "max_context": 256,
+      "streaming_supported": true,
+      "chat_template_required": false,
+      "hardware_constraints": {
+        "min_gpu_memory_gb": 1,
+        "supports_fp8_kv": false,
+        "requires_cuda": true,
+        "allowed_gpu_names": [
+          "NVIDIA GeForce RTX 3050"
+        ]
+      },
+      "policy_mode": "balanced"
+    },
+    {
+      "model_id": "perkunas/perkunas-3050-pilot-5000",
+      "task_type": "generate",
+      "backend": "perkunas",
+      "backend_config": {
+        "model_name_or_path": "training/artifacts/perkunas_3050_pilot_best_5000",
+        "device": "cuda:0",
+        "max_context": 256,
+        "top_k": 50,
+        "force_unoptimized_kv": true
+      },
+      "quantization_mode": "fp16",
+      "kv_compression_mode": "turboquant",
+      "kv_required": true,
+      "max_context": 256,
+      "streaming_supported": true,
+      "chat_template_required": false,
+      "hardware_constraints": {
+        "min_gpu_memory_gb": 1,
+        "supports_fp8_kv": false,
+        "requires_cuda": true,
+        "allowed_gpu_names": [
+          "NVIDIA GeForce RTX 3050"
+        ]
+      },
+      "policy_mode": "balanced"
+    },
+      {
+      "model_id": "perkunas/perkunas-3050-pilot-10000",
+      "task_type": "generate",
+      "backend": "perkunas",
+      "backend_config": {
+        "model_name_or_path": "training/artifacts/perkunas_3050_pilot_best_10000",
+        "device": "cuda:0",
+        "max_context": 256,
+        "top_k": 50,
+        "force_unoptimized_kv": true
+      },
+      "quantization_mode": "fp16",
+      "kv_compression_mode": "turboquant",
+      "kv_required": true,
+      "max_context": 256,
+      "streaming_supported": true,
+      "chat_template_required": false,
+      "hardware_constraints": {
+        "min_gpu_memory_gb": 1,
+        "supports_fp8_kv": false,
+        "requires_cuda": true,
+        "allowed_gpu_names": [
+          "NVIDIA GeForce RTX 3050"
+        ]
+      },
+      "policy_mode": "balanced"
+    },
+          {
+      "model_id": "perkunas/perkunas-3050-pilot-test",
+      "task_type": "generate",
+      "backend": "perkunas",
+      "backend_config": {
+        "model_name_or_path": "training/artifacts/perkunas_3050_pilot_test",
+        "device": "cuda:0",
+        "max_context": 256,
+        "top_k": 50,
+        "force_unoptimized_kv": true
+      },
+      "quantization_mode": "fp16",
+      "kv_compression_mode": "turboquant",
+      "kv_required": true,
+      "max_context": 512,
+      "streaming_supported": true,
+      "chat_template_required": false,
+      "hardware_constraints": {
+        "min_gpu_memory_gb": 1,
+        "supports_fp8_kv": false,
+        "requires_cuda": true,
+        "allowed_gpu_names": [
+          "NVIDIA GeForce RTX 3050"
+        ]
+      },
+      "policy_mode": "balanced"
+    }
+  ]
+}

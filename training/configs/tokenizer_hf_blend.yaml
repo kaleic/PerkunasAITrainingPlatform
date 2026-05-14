@@ -1,0 +1,12 @@
+input_glob: training/data/hf_blend/dedup/*.jsonl
+output_dir: training/tokenizer/perkunas-hf-blend-tokenizer
+vocab_size: 8000
+min_frequency: 2
+limit_files: null
+sample_size: 2000
+special_tokens:
+  - <pad>
+  - <s>
+  - </s>
+  - <unk>
+  - <mask>

@@ -1,0 +1,91 @@
+input_paths: []
+datasets:
+  - name: common_corpus
+    type: parquet_local
+    weight: 0.5
+    paths:
+      - D:\LLMProject\0000.parquet
+    text_field: text
+    metadata_fields:
+      - identifier
+      - collection
+      - open_type
+      - curator
+      - license
+      - date
+      - title
+      - creator
+      - language
+      - language_type
+      - word_count
+      - token_count
+    max_records_per_path: 6000
+
+  - name: c4
+    type: parquet_local
+    weight: 0.5
+    default_language: en
+    paths:
+      - D:\LLMProject\TrainingData\allenai\c4\training\0000.parquet
+      - D:\LLMProject\TrainingData\allenai\c4\training\0001.parquet
+      - D:\LLMProject\TrainingData\allenai\c4\training\0002.parquet
+      - D:\LLMProject\TrainingData\allenai\c4\training\0003.parquet
+      - D:\LLMProject\TrainingData\allenai\c4\training\0004.parquet
+      - D:\LLMProject\TrainingData\allenai\c4\training\0005.parquet
+      - D:\LLMProject\TrainingData\allenai\c4\training\0006.parquet
+      - D:\LLMProject\TrainingData\allenai\c4\training\0007.parquet
+      - D:\LLMProject\TrainingData\allenai\c4\training\0008.parquet
+      - D:\LLMProject\TrainingData\allenai\c4\training\0009.parquet
+    text_field: text
+    metadata_fields:
+      - timestamp
+      - url
+    max_records_per_path: 700
+
+validation_datasets:
+  - name: c4_validation
+    type: parquet_local
+    weight: 1.0
+    default_language: en
+    paths:
+      - D:\LLMProject\TrainingData\allenai\c4\validation\0000.parquet
+    text_field: text
+    metadata_fields:
+      - timestamp
+      - url
+    max_records_per_path: 1000
+
+reports_dir: training/reports/perkunas_pilot
+prepared_dir: training/data/perkunas_pilot/prepared
+dedup_dir: training/data/perkunas_pilot/dedup
+tokenized_dir: training/data/perkunas_pilot/tokenized
+text_field: text
+metadata_fields: []
+batch_size: 1024
+min_chars: 200
+max_chars: 200000
+min_words: 20
+language_allowlist:
+  - English
+  - en
+allowed_languages: null
+allowed_licenses: null
+min_date: null
+max_date: null
+output_shard_rows: 2000
+resume: true
+validation_fraction: 0.01
+sequence_length: 256
+tokenization_batch_size: 256
+tokenizer_path: training/tokenizer/perkunas-pilot-tokenizer
+chunking:
+  enabled: true
+  target_chars: 12000
+  max_chars: 16000
+  overlap_chars: 512
+dedup:
+  exact: true
+  approximate: false
+  hamming_threshold: 3
+  max_simhash_tokens: 1024
+  max_simhash_chars: 60000

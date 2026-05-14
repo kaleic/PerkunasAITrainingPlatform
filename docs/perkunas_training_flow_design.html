@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Perkunas Training Flow Engineering Design</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --ink: #111827;
+      --muted: #5b6472;
+      --line: #d8dee9;
+      --blue: #2563eb;
+      --blue-soft: #e8f0ff;
+      --teal: #0f766e;
+      --teal-soft: #dcfdf7;
+      --amber: #b45309;
+      --amber-soft: #fff3d6;
+      --rose: #be123c;
+      --rose-soft: #ffe4eb;
+      --violet: #6d28d9;
+      --violet-soft: #f0e8ff;
+      --green: #15803d;
+      --green-soft: #e5f8ec;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 32px 24px 56px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .hero-copy,
+    .panel,
+    .stat,
+    .flow-card,
+    .legend-card,
+    .mini-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-copy {
+      padding: 32px;
+    }
+
+    .eyebrow {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 10px 0 14px;
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 26px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .lead {
+      max-width: 760px;
+      font-size: 17px;
+      color: #334155;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 24px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f9fbff;
+      color: #263244;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .hero-graphic {
+      position: relative;
+      min-height: 386px;
+      overflow: hidden;
+      padding: 24px;
+      background:
+        linear-gradient(135deg, rgba(37, 99, 235, 0.12), transparent 42%),
+        linear-gradient(235deg, rgba(15, 118, 110, 0.14), transparent 50%),
+        #ffffff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-graphic svg,
+    .diagram svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 0 0 24px;
+    }
+
+    .stat {
+      padding: 18px;
+      min-height: 112px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 27px;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .panel {
+      padding: 24px;
+      margin-top: 16px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 18px;
+    }
+
+    .panel-header p {
+      max-width: 760px;
+    }
+
+    .diagram {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdff;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .flow-card {
+      padding: 16px;
+      min-height: 178px;
+      box-shadow: none;
+    }
+
+    .flow-card .num {
+      width: 30px;
+      height: 30px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .flow-card p {
+      font-size: 13px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .three-col {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .legend-card,
+    .mini-card {
+      padding: 16px;
+      box-shadow: none;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      margin-top: 4px;
+      flex: 0 0 auto;
+    }
+
+    .command {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: var(--radius);
+      background: #0f172a;
+      color: #e5eefc;
+      overflow-x: auto;
+      font: 13px/1.55 "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      white-space: pre;
+    }
+
+    .callout {
+      margin-top: 18px;
+      padding: 16px;
+      border-left: 4px solid var(--teal);
+      background: var(--teal-soft);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    .callout p {
+      color: #134e4a;
+    }
+
+    .caption {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .footer {
+      margin-top: 28px;
+      color: #64748b;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .two-col,
+      .three-col {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .flow-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page {
+        padding: 20px 14px 40px;
+      }
+
+      .hero-copy,
+      .panel {
+        padding: 20px;
+      }
+
+      .stats,
+      .flow-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-header {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Engineering Flow Map</div>
+        <h1>Streaming Training Built for Bounded Memory</h1>
+        <p class="lead">
+          Perkunas trains large language model checkpoints through a streamed execution loop:
+          compact active residency, replayable boundary traces, guarded updates, durable publishing,
+          and telemetry that makes every phase measurable.
+        </p>
+        <div class="chips" aria-label="Core design themes">
+          <span class="chip"><span class="dot"></span>Bounded active residency</span>
+          <span class="chip"><span class="dot" style="background: var(--teal)"></span>Replayable traces</span>
+          <span class="chip"><span class="dot" style="background: var(--amber)"></span>Guarded commits</span>
+          <span class="chip"><span class="dot" style="background: var(--violet)"></span>Telemetry first</span>
+        </div>
+      </div>
+
+      <div class="hero-graphic" aria-label="Streaming training overview graphic">
+        <svg viewBox="0 0 640 430" role="img">
+          <defs>
+            <marker id="arrowHero" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L9,3 L0,6 Z" fill="#2563eb"></path>
+            </marker>
+            <linearGradient id="heroBand" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.95"></stop>
+              <stop offset="100%" stop-color="#0f766e" stop-opacity="0.95"></stop>
+            </linearGradient>
+          </defs>
+          <rect x="24" y="28" width="592" height="374" rx="18" fill="#fff" stroke="#d8dee9"></rect>
+          <rect x="54" y="62" width="124" height="72" rx="10" fill="#e8f0ff" stroke="#93b4ff"></rect>
+          <text x="116" y="91" text-anchor="middle" font-size="15" font-weight="800" fill="#1e3a8a">Packed Data</text>
+          <text x="116" y="114" text-anchor="middle" font-size="12" fill="#475569">token blocks</text>
+
+          <rect x="258" y="56" width="124" height="84" rx="10" fill="#dcfdf7" stroke="#5eead4"></rect>
+          <text x="320" y="87" text-anchor="middle" font-size="15" font-weight="800" fill="#115e59">Forward Trace</text>
+          <text x="320" y="111" text-anchor="middle" font-size="12" fill="#475569">boundary states</text>
+
+          <rect x="462" y="62" width="124" height="72" rx="10" fill="#fff3d6" stroke="#fbbf24"></rect>
+          <text x="524" y="91" text-anchor="middle" font-size="15" font-weight="800" fill="#92400e">Guard</text>
+          <text x="524" y="114" text-anchor="middle" font-size="12" fill="#475569">accept or retry</text>
+
+          <path d="M180 98 C208 98, 228 98, 256 98" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowHero)"></path>
+          <path d="M384 98 C412 98, 432 98, 460 98" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowHero)"></path>
+
+          <rect x="70" y="218" width="500" height="96" rx="16" fill="url(#heroBand)" opacity="0.95"></rect>
+          <text x="320" y="253" text-anchor="middle" font-size="18" font-weight="900" fill="#fff">Streamed Segment Execution</text>
+          <text x="320" y="282" text-anchor="middle" font-size="13" fill="#e0f2fe">load one active segment, compute, release, publish coherent updates</text>
+
+          <path d="M524 136 C524 178, 486 198, 438 218" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowHero)"></path>
+          <path d="M196 218 C144 198, 116 176, 116 138" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowHero)"></path>
+
+          <rect x="66" y="342" width="142" height="38" rx="10" fill="#f0e8ff" stroke="#c4b5fd"></rect>
+          <text x="137" y="366" text-anchor="middle" font-size="13" font-weight="800" fill="#5b21b6">Telemetry</text>
+          <rect x="250" y="342" width="142" height="38" rx="10" fill="#e5f8ec" stroke="#86efac"></rect>
+          <text x="321" y="366" text-anchor="middle" font-size="13" font-weight="800" fill="#166534">Validation</text>
+          <rect x="434" y="342" width="142" height="38" rx="10" fill="#ffe4eb" stroke="#fda4af"></rect>
+          <text x="505" y="366" text-anchor="middle" font-size="13" font-weight="800" fill="#9f1239">Durable Store</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Design summary">
+      <div class="stat">
+        <strong>1 active</strong>
+        <span>Training compute works through a small active segment set instead of requiring full model residency.</span>
+      </div>
+      <div class="stat">
+        <strong>2 stores</strong>
+        <span>An active working store receives frequent updates; a durable archive is published at configured boundaries.</span>
+      </div>
+      <div class="stat">
+        <strong>3 rails</strong>
+        <span>Learning rate, gradient norm, and guarded replay form the main safety rails for noisy steps.</span>
+      </div>
+      <div class="stat">
+        <strong>Full trace</strong>
+        <span>Every step emits timing, memory, residency, guard, gradient, and validation telemetry.</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="eyebrow">End-to-End Flow</div>
+          <h2>Training Control Plane</h2>
+        </div>
+        <p>
+          The trainer coordinates data loading, segment activation, trace staging, replayed backward passes,
+          candidate update publication, validation, and telemetry. Each phase has a narrow contract so the
+          system can be tuned without changing the checkpoint format.
+        </p>
+      </div>
+      <div class="diagram">
+        <svg viewBox="0 0 1180 430" role="img" aria-label="Training control plane diagram">
+          <defs>
+            <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L9,3 L0,6 Z" fill="#2563eb"></path>
+            </marker>
+          </defs>
+          <rect width="1180" height="430" fill="#fbfdff"></rect>
+          <g font-family="Inter, Arial, sans-serif">
+            <rect x="42" y="64" width="158" height="86" rx="10" fill="#e8f0ff" stroke="#93b4ff"></rect>
+            <text x="121" y="94" text-anchor="middle" font-size="16" font-weight="800" fill="#1e3a8a">Data Plane</text>
+            <text x="121" y="121" text-anchor="middle" font-size="12" fill="#475569">packed token windows</text>
+
+            <rect x="252" y="64" width="158" height="86" rx="10" fill="#dcfdf7" stroke="#5eead4"></rect>
+            <text x="331" y="94" text-anchor="middle" font-size="16" font-weight="800" fill="#115e59">Forward Trace</text>
+            <text x="331" y="121" text-anchor="middle" font-size="12" fill="#475569">boundary snapshots</text>
+
+            <rect x="462" y="64" width="158" height="86" rx="10" fill="#f0e8ff" stroke="#c4b5fd"></rect>
+            <text x="541" y="94" text-anchor="middle" font-size="16" font-weight="800" fill="#5b21b6">Backward Replay</text>
+            <text x="541" y="121" text-anchor="middle" font-size="12" fill="#475569">local gradients</text>
+
+            <rect x="672" y="64" width="158" height="86" rx="10" fill="#fff3d6" stroke="#fbbf24"></rect>
+            <text x="751" y="94" text-anchor="middle" font-size="16" font-weight="800" fill="#92400e">Guarded Step</text>
+            <text x="751" y="121" text-anchor="middle" font-size="12" fill="#475569">retry or accept</text>
+
+            <rect x="882" y="64" width="158" height="86" rx="10" fill="#ffe4eb" stroke="#fda4af"></rect>
+            <text x="961" y="94" text-anchor="middle" font-size="16" font-weight="800" fill="#9f1239">Transaction</text>
+            <text x="961" y="121" text-anchor="middle" font-size="12" fill="#475569">atomic publish</text>
+
+            <path d="M202 107 H250" stroke="#2563eb" stroke-width="3" marker-end="url(#arrowBlue)"></path>
+            <path d="M412 107 H460" stroke="#2563eb" stroke-width="3" marker-end="url(#arrowBlue)"></path>
+            <path d="M622 107 H670" stroke="#2563eb" stroke-width="3" marker-end="url(#arrowBlue)"></path>
+            <path d="M832 107 H880" stroke="#2563eb" stroke-width="3" marker-end="url(#arrowBlue)"></path>
+
+            <rect x="78" y="236" width="202" height="96" rx="12" fill="#fff" stroke="#d8dee9"></rect>
+            <text x="179" y="267" text-anchor="middle" font-size="15" font-weight="800" fill="#111827">Active Working Store</text>
+            <text x="179" y="294" text-anchor="middle" font-size="12" fill="#475569">fast local writes</text>
+            <text x="179" y="316" text-anchor="middle" font-size="12" fill="#475569">resume state and logs</text>
+
+            <rect x="414" y="236" width="202" height="96" rx="12" fill="#fff" stroke="#d8dee9"></rect>
+            <text x="515" y="267" text-anchor="middle" font-size="15" font-weight="800" fill="#111827">Telemetry Stream</text>
+            <text x="515" y="294" text-anchor="middle" font-size="12" fill="#475569">timing, memory, guard</text>
+            <text x="515" y="316" text-anchor="middle" font-size="12" fill="#475569">validation and gradients</text>
+
+            <rect x="750" y="236" width="202" height="96" rx="12" fill="#fff" stroke="#d8dee9"></rect>
+            <text x="851" y="267" text-anchor="middle" font-size="15" font-weight="800" fill="#111827">Durable Archive</text>
+            <text x="851" y="294" text-anchor="middle" font-size="12" fill="#475569">periodic flush</text>
+            <text x="851" y="316" text-anchor="middle" font-size="12" fill="#475569">coherent run state</text>
+
+            <path d="M961 152 C962 202, 846 206, 846 234" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowBlue)"></path>
+            <path d="M751 152 C740 204, 532 204, 522 234" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowBlue)"></path>
+            <path d="M961 152 C916 196, 234 196, 188 234" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowBlue)"></path>
+
+            <rect x="1028" y="234" width="108" height="38" rx="8" fill="#e5f8ec" stroke="#86efac"></rect>
+            <text x="1082" y="258" text-anchor="middle" font-size="12" font-weight="800" fill="#166534">vLLM Export</text>
+            <path d="M952 284 H1026" stroke="#2563eb" stroke-width="3" marker-end="url(#arrowBlue)"></path>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="eyebrow">Step Lifecycle</div>
+          <h2>One Training Step</h2>
+        </div>
+        <p>
+          A step is treated as a candidate state transition. It is measured, guarded, and published only
+          after the active working store has a coherent set of segment updates.
+        </p>
+      </div>
+      <div class="flow-grid">
+        <article class="flow-card">
+          <div class="num">1</div>
+          <h3>Read Packed Tokens</h3>
+          <p>Load fixed-length token windows and accumulate the configured micro-batches.</p>
+        </article>
+        <article class="flow-card">
+          <div class="num">2</div>
+          <h3>Build Forward Trace</h3>
+          <p>Run streamed forward compute and keep only boundary tensors needed for replay.</p>
+        </article>
+        <article class="flow-card">
+          <div class="num">3</div>
+          <h3>Replay Backward</h3>
+          <p>Reload one active segment at a time, recompute local forward, and propagate gradients.</p>
+        </article>
+        <article class="flow-card">
+          <div class="num">4</div>
+          <h3>Apply Safety Rails</h3>
+          <p>Clip gradients globally or locally; guard can retry with scaled learning rate and norm budget.</p>
+        </article>
+        <article class="flow-card">
+          <div class="num">5</div>
+          <h3>Stage Candidate Update</h3>
+          <p>Write parameter and optimizer updates into a transaction area before publishing.</p>
+        </article>
+        <article class="flow-card">
+          <div class="num">6</div>
+          <h3>Commit and Measure</h3>
+          <p>Publish accepted state, prime prefetch, validate on schedule, and append telemetry.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="eyebrow">Forward and Backward</div>
+          <h2>Trace Staging Design</h2>
+        </div>
+        <p>
+          The forward pass does not retain a full autograd graph. Instead, it records boundary tensors
+          that backward replay can restore later. The trace storage target is now configurable.
+        </p>
+      </div>
+      <div class="two-col">
+        <div class="diagram">
+          <svg viewBox="0 0 560 360" role="img" aria-label="Forward trace staging">
+            <defs>
+              <marker id="arrowTeal" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L9,3 L0,6 Z" fill="#0f766e"></path>
+              </marker>
+            </defs>
+            <rect width="560" height="360" fill="#fbfdff"></rect>
+            <text x="28" y="42" font-size="18" font-weight="900" fill="#111827">Forward Trace</text>
+            <text x="28" y="68" font-size="13" fill="#64748b">Compute active segment, detach boundary, stage for replay.</text>
+
+            <rect x="42" y="118" width="132" height="72" rx="10" fill="#e8f0ff" stroke="#93b4ff"></rect>
+            <text x="108" y="149" text-anchor="middle" font-size="14" font-weight="800" fill="#1e3a8a">Active GPU</text>
+            <text x="108" y="171" text-anchor="middle" font-size="12" fill="#475569">segment compute</text>
+
+            <rect x="218" y="118" width="132" height="72" rx="10" fill="#dcfdf7" stroke="#5eead4"></rect>
+            <text x="284" y="149" text-anchor="middle" font-size="14" font-weight="800" fill="#115e59">Boundary</text>
+            <text x="284" y="171" text-anchor="middle" font-size="12" fill="#475569">detached tensor</text>
+
+            <rect x="394" y="82" width="124" height="54" rx="10" fill="#fff" stroke="#d8dee9"></rect>
+            <text x="456" y="115" text-anchor="middle" font-size="13" font-weight="800" fill="#111827">CPU</text>
+            <rect x="394" y="152" width="124" height="54" rx="10" fill="#fff" stroke="#d8dee9"></rect>
+            <text x="456" y="185" text-anchor="middle" font-size="13" font-weight="800" fill="#111827">GPU</text>
+            <rect x="394" y="222" width="124" height="54" rx="10" fill="#fff" stroke="#d8dee9"></rect>
+            <text x="456" y="255" text-anchor="middle" font-size="13" font-weight="800" fill="#111827">GPU 2</text>
+
+            <path d="M176 154 H216" stroke="#0f766e" stroke-width="3" marker-end="url(#arrowTeal)"></path>
+            <path d="M352 154 C374 128, 374 112, 392 110" stroke="#0f766e" stroke-width="3" fill="none" marker-end="url(#arrowTeal)"></path>
+            <path d="M352 154 H392" stroke="#0f766e" stroke-width="3" marker-end="url(#arrowTeal)"></path>
+            <path d="M352 154 C374 194, 374 244, 392 248" stroke="#0f766e" stroke-width="3" fill="none" marker-end="url(#arrowTeal)"></path>
+
+            <text x="42" y="306" font-size="12" fill="#64748b">CLI:</text>
+            <text x="74" y="306" font-size="12" font-family="Consolas, monospace" fill="#111827">--trace-storage cpu|gpu|secondary-gpu</text>
+          </svg>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 560 360" role="img" aria-label="Backward replay staging">
+            <defs>
+              <marker id="arrowViolet" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L9,3 L0,6 Z" fill="#6d28d9"></path>
+              </marker>
+            </defs>
+            <rect width="560" height="360" fill="#fbfdff"></rect>
+            <text x="28" y="42" font-size="18" font-weight="900" fill="#111827">Backward Replay</text>
+            <text x="28" y="68" font-size="13" fill="#64748b">Restore boundary, recompute local path, stage gradient downstream.</text>
+
+            <rect x="42" y="116" width="126" height="76" rx="10" fill="#f0e8ff" stroke="#c4b5fd"></rect>
+            <text x="105" y="147" text-anchor="middle" font-size="14" font-weight="800" fill="#5b21b6">Trace Store</text>
+            <text x="105" y="170" text-anchor="middle" font-size="12" fill="#475569">boundary tensor</text>
+
+            <rect x="216" y="116" width="126" height="76" rx="10" fill="#e8f0ff" stroke="#93b4ff"></rect>
+            <text x="279" y="147" text-anchor="middle" font-size="14" font-weight="800" fill="#1e3a8a">Active GPU</text>
+            <text x="279" y="170" text-anchor="middle" font-size="12" fill="#475569">local backward</text>
+
+            <rect x="390" y="116" width="126" height="76" rx="10" fill="#ffe4eb" stroke="#fda4af"></rect>
+            <text x="453" y="147" text-anchor="middle" font-size="14" font-weight="800" fill="#9f1239">Grad Stage</text>
+            <text x="453" y="170" text-anchor="middle" font-size="12" fill="#475569">next segment</text>
+
+            <path d="M170 154 H214" stroke="#6d28d9" stroke-width="3" marker-end="url(#arrowViolet)"></path>
+            <path d="M344 154 H388" stroke="#6d28d9" stroke-width="3" marker-end="url(#arrowViolet)"></path>
+
+            <rect x="64" y="252" width="110" height="38" rx="8" fill="#fff" stroke="#d8dee9"></rect>
+            <text x="119" y="276" text-anchor="middle" font-size="12" font-weight="800" fill="#111827">restore</text>
+            <rect x="224" y="252" width="110" height="38" rx="8" fill="#fff" stroke="#d8dee9"></rect>
+            <text x="279" y="276" text-anchor="middle" font-size="12" font-weight="800" fill="#111827">compute</text>
+            <rect x="384" y="252" width="110" height="38" rx="8" fill="#fff" stroke="#d8dee9"></rect>
+            <text x="439" y="276" text-anchor="middle" font-size="12" font-weight="800" fill="#111827">stage</text>
+          </svg>
+        </div>
+      </div>
+      <div class="callout">
+        <p>
+          Same-GPU trace staging can reduce CPU round trips, but it uses the training GPU's VRAM.
+          Secondary-GPU staging keeps the low-memory design while replacing CPU traffic with GPU-to-GPU traffic.
+        </p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="eyebrow">Safety Overlay</div>
+          <h2>Guarded Step Replay</h2>
+        </div>
+        <p>
+          Guarded replay treats each update as a proposal. If the replayed batch does not stay within the
+          configured tolerance, the trainer retries with scaled learning rate and gradient norm budget.
+        </p>
+      </div>
+      <div class="diagram">
+        <svg viewBox="0 0 1180 390" role="img" aria-label="Guarded replay decision tree">
+          <defs>
+            <marker id="arrowAmber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L9,3 L0,6 Z" fill="#b45309"></path>
+            </marker>
+          </defs>
+          <rect width="1180" height="390" fill="#fbfdff"></rect>
+          <g font-family="Inter, Arial, sans-serif">
+            <rect x="54" y="78" width="160" height="74" rx="10" fill="#e8f0ff" stroke="#93b4ff"></rect>
+            <text x="134" y="110" text-anchor="middle" font-size="15" font-weight="800" fill="#1e3a8a">Batch Before</text>
+            <text x="134" y="132" text-anchor="middle" font-size="12" fill="#475569">loss_before</text>
+
+            <rect x="286" y="78" width="160" height="74" rx="10" fill="#fff3d6" stroke="#fbbf24"></rect>
+            <text x="366" y="110" text-anchor="middle" font-size="15" font-weight="800" fill="#92400e">Candidate</text>
+            <text x="366" y="132" text-anchor="middle" font-size="12" fill="#475569">scaled update</text>
+
+            <rect x="518" y="78" width="160" height="74" rx="10" fill="#dcfdf7" stroke="#5eead4"></rect>
+            <text x="598" y="110" text-anchor="middle" font-size="15" font-weight="800" fill="#115e59">Replay Batch</text>
+            <text x="598" y="132" text-anchor="middle" font-size="12" fill="#475569">loss_after</text>
+
+            <path d="M216 115 H284" stroke="#b45309" stroke-width="3" marker-end="url(#arrowAmber)"></path>
+            <path d="M448 115 H516" stroke="#b45309" stroke-width="3" marker-end="url(#arrowAmber)"></path>
+
+            <path d="M764 114 L848 70 L932 114 L848 158 Z" fill="#fff" stroke="#b45309" stroke-width="2"></path>
+            <text x="848" y="106" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">Within</text>
+            <text x="848" y="124" text-anchor="middle" font-size="13" font-weight="800" fill="#92400e">tolerance?</text>
+            <path d="M680 115 H762" stroke="#b45309" stroke-width="3" marker-end="url(#arrowAmber)"></path>
+
+            <rect x="1000" y="54" width="136" height="62" rx="10" fill="#e5f8ec" stroke="#86efac"></rect>
+            <text x="1068" y="82" text-anchor="middle" font-size="14" font-weight="800" fill="#166534">Commit</text>
+            <text x="1068" y="101" text-anchor="middle" font-size="11" fill="#475569">publish state</text>
+            <path d="M932 104 H998" stroke="#15803d" stroke-width="3" marker-end="url(#arrowAmber)"></path>
+            <text x="964" y="92" text-anchor="middle" font-size="12" fill="#15803d">yes</text>
+
+            <rect x="1000" y="178" width="136" height="62" rx="10" fill="#ffe4eb" stroke="#fda4af"></rect>
+            <text x="1068" y="206" text-anchor="middle" font-size="14" font-weight="800" fill="#9f1239">Retry</text>
+            <text x="1068" y="225" text-anchor="middle" font-size="11" fill="#475569">reduce scale</text>
+            <path d="M904 146 C940 184, 962 208, 998 208" stroke="#be123c" stroke-width="3" fill="none" marker-end="url(#arrowAmber)"></path>
+            <text x="946" y="178" text-anchor="middle" font-size="12" fill="#be123c">no</text>
+
+            <path d="M1000 240 C850 324, 404 322, 368 154" stroke="#be123c" stroke-width="3" fill="none" stroke-dasharray="8 7" marker-end="url(#arrowAmber)"></path>
+
+            <rect x="286" y="264" width="608" height="62" rx="12" fill="#fff" stroke="#d8dee9"></rect>
+            <text x="590" y="290" text-anchor="middle" font-size="14" font-weight="800" fill="#111827">Attempt log captures accepted scale, rejected attempts, loss delta, and gradient clip scale.</text>
+            <text x="590" y="312" text-anchor="middle" font-size="12" fill="#64748b">This is the training loop's safety recorder, not just a console message.</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="eyebrow">Observability</div>
+          <h2>Telemetry Surfaces</h2>
+        </div>
+        <p>
+          The training log is designed to explain both learning behavior and system behavior. The same
+          stream powers dashboard views for loss curves, spikes, replay attempts, device traffic, residency,
+          validation, and throughput.
+        </p>
+      </div>
+      <div class="three-col">
+        <div class="legend-card">
+          <h3>Learning Signals</h3>
+          <div class="legend-row">
+            <span class="swatch" style="background: var(--blue)"></span>
+            <p>train loss, validation loss, perplexity, rolling noise, guard loss delta</p>
+          </div>
+          <div class="legend-row">
+            <span class="swatch" style="background: var(--teal)"></span>
+            <p>global gradient norm, clip scale, per-step accepted learning rate</p>
+          </div>
+        </div>
+        <div class="legend-card">
+          <h3>System Signals</h3>
+          <div class="legend-row">
+            <span class="swatch" style="background: var(--amber)"></span>
+            <p>param load, module build, h2d, kernel time, trace stage and restore</p>
+          </div>
+          <div class="legend-row">
+            <span class="swatch" style="background: var(--violet)"></span>
+            <p>active residency, cached segments, optimizer residency, memory peaks</p>
+          </div>
+        </div>
+        <div class="legend-card">
+          <h3>Decision Signals</h3>
+          <div class="legend-row">
+            <span class="swatch" style="background: var(--green)"></span>
+            <p>accepted replay attempts, retry count, effective LR scale, norm scale</p>
+          </div>
+          <div class="legend-row">
+            <span class="swatch" style="background: var(--rose)"></span>
+            <p>validation regressions, spikes above threshold, degraded throughput</p>
+          </div>
+        </div>
+      </div>
+      <div class="command">python training/scripts/build_train_telemetry_dashboard.py -input E:\Perkunas_v2.9_100m_tinystories_active\train_log.jsonl</div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="eyebrow">Operational Modes</div>
+          <h2>Trace and Prefetch Choices</h2>
+        </div>
+        <p>
+          The training system separates two concerns: prefetch controls where upcoming parameter payloads
+          are staged, while trace storage controls where forward boundaries and backward boundary gradients
+          are staged.
+        </p>
+      </div>
+      <div class="three-col">
+        <div class="mini-card">
+          <h3>Lowest VRAM</h3>
+          <p>Keep traces on CPU. This is slower but safest when the active GPU is memory constrained.</p>
+          <div class="command">--trace-storage cpu</div>
+        </div>
+        <div class="mini-card">
+          <h3>Same-GPU Speed Test</h3>
+          <p>Stage traces on the training GPU. Useful when VRAM headroom exists and CPU traffic is dominant.</p>
+          <div class="command">--trace-storage gpu</div>
+        </div>
+        <div class="mini-card">
+          <h3>Second-GPU Staging</h3>
+          <p>Use another CUDA device as a fast trace shelf without changing the training compute GPU.</p>
+          <div class="command">--trace-storage secondary-gpu `
+--trace-storage-device cuda:1</div>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer">
+      Perkunas training flow design companion. This page is a visualization layer for the engineering docs,
+      telemetry dashboard, and training command recipes.
+    </p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "perkunas-training"
+version = "0.1.0"
+description = "From-scratch pretraining pipeline for the Perkunas decoder-only language model"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26.0",
+  "pyarrow>=15.0.0",
+  "PyYAML>=6.0.0",
+  "datasets>=2.19.0",
+  "tokenizers>=0.15.0",
+  "torch>=2.2.0",
+  "safetensors>=0.4.0",
+  "tqdm>=4.66.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "ruff>=0.5.0"
+]
+
+[project.scripts]
+perkunas-inspect = "perkunas_training.data.inspect:main"
+perkunas-inspect-hf = "perkunas_training.data.inspect_hf:main"
+perkunas-normalize = "perkunas_training.data.normalize:main"
+perkunas-dedup = "perkunas_training.data.dedup:main"
+perkunas-train-tokenizer = "perkunas_training.tokenizer.train_tokenizer:main"
+perkunas-tokenize = "perkunas_training.tokenization.tokenize_corpus:main"
+perkunas-train = "perkunas_training.train.train_perkunas:main"
+perkunas-train-v2 = "perkunas_training.perkunasv2.train_perkunasv2:main"
+perkunas-train-v2-c4 = "perkunas_training.perkunasv2.c4_training:main"
+perkunas-tokenize-v2-c4 = "perkunas_training.perkunasv2.c4_tokenize:main"
+perkunas-eval = "perkunas_training.eval.eval_checkpoint:main"
+perkunas-export-hf = "perkunas_training.export.export_hf:main"
+perkunas-gpu-smoke = "perkunas_training.train.gpu_smoke:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

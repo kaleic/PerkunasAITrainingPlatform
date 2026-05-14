@@ -1,0 +1,19 @@
+{
+  "vocab_size": 256,
+  "hidden_size": 64,
+  "num_layers": 2,
+  "num_heads": 4,
+  "intermediate_size": 256,
+  "max_position_embeddings": 32,
+  "rope_theta": 10000.0,
+  "norm_type": "rmsnorm",
+  "rms_norm_eps": 1e-5,
+  "activation_function": "swiglu",
+  "tied_embeddings": false,
+  "dropout": 0.0,
+  "attention_dropout": 0.0,
+  "initializer_range": 0.02,
+  "pad_token_id": 0,
+  "bos_token_id": 1,
+  "eos_token_id": 2
+}

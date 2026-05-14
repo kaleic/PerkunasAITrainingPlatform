@@ -1,0 +1,67 @@
+input_paths: []
+datasets:
+  - name: common_corpus_hf
+    type: hf_dataset
+    dataset_name: PleIAs/common_corpus
+    split: train
+    streaming: true
+    weight: 1.0
+    text_field: text
+    metadata_fields:
+      - identifier
+      - id
+      - collection
+      - open_type
+      - curator
+      - license
+      - date
+      - title
+      - creator
+      - language
+      - language_type
+      - word_count
+      - token_count
+      - source
+      - url
+    max_records: 10000
+
+validation_datasets: []
+
+reports_dir: training/reports/hf_common_corpus
+prepared_dir: training/data/hf_common_corpus/prepared
+dedup_dir: training/data/hf_common_corpus/dedup
+tokenized_dir: training/data/hf_common_corpus/tokenized
+text_field: text
+metadata_fields: []
+batch_size: 1024
+min_chars: 200
+max_chars: 200000
+min_words: 20
+language_allowlist:
+  - English
+  - en
+allowed_languages: null
+allowed_licenses: null
+license_allowlist: null
+license_blocklist: null
+collection_allowlist: null
+collection_blocklist: null
+min_date: null
+max_date: null
+output_shard_rows: 2000
+resume: true
+validation_fraction: 0.01
+sequence_length: 256
+tokenization_batch_size: 256
+tokenizer_path: training/tokenizer/perkunas-hf-common-corpus-tokenizer
+chunking:
+  enabled: true
+  target_chars: 4000
+  max_chars: 6000
+  overlap_chars: 400
+dedup:
+  exact: true
+  approximate: false
+  hamming_threshold: 3
+  max_simhash_tokens: 1024
+  max_simhash_chars: 60000

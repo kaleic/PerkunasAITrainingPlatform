@@ -1,0 +1,27 @@
+model_name: perkunas-medium
+vocab_size: 32000
+hidden_size: 768
+intermediate_size: 2048
+num_hidden_layers: 16
+num_attention_heads: 12
+num_key_value_heads: 12
+max_position_embeddings: 2048
+rope_theta: 10000.0
+rms_norm_eps: 1.0e-5
+activation: swiglu
+dropout: 0.0
+attention_dropout: 0.0
+tie_word_embeddings: true
+initializer_range: 0.02
+pad_token_id: 0
+bos_token_id: 1
+eos_token_id: 2
+unk_token_id: 3
+modality_extension:
+  enabled: true
+  projection_dim: 768
+  adapter_init_std: 0.02
+auxiliary_heads:
+  embedding: false
+  classification: false
+  reranking: false

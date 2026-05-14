@@ -1,0 +1,27 @@
+model_name: perkunas-large
+vocab_size: 32000
+hidden_size: 1536
+intermediate_size: 4096
+num_hidden_layers: 24
+num_attention_heads: 16
+num_key_value_heads: 16
+max_position_embeddings: 4096
+rope_theta: 10000.0
+rms_norm_eps: 1.0e-5
+activation: swiglu
+dropout: 0.0
+attention_dropout: 0.0
+tie_word_embeddings: true
+initializer_range: 0.02
+pad_token_id: 0
+bos_token_id: 1
+eos_token_id: 2
+unk_token_id: 3
+modality_extension:
+  enabled: true
+  projection_dim: 1536
+  adapter_init_std: 0.02
+auxiliary_heads:
+  embedding: false
+  classification: false
+  reranking: false

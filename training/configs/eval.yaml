@@ -1,0 +1,11 @@
+checkpoint: training/runs/perkunas_3050_pilot/checkpoints/latest
+tokenizer_dir: training/tokenizer/perkunas-pilot-tokenizer
+val_shards_glob: training/data/perkunas_pilot/tokenized/val_*.npy
+output_dir: training/reports/perkunas_pilot/eval
+max_batches: 20
+batch_size: 1
+generation_prompts:
+  - "Perkunas is"
+  - "The purpose of language modeling is"
+  - "A helpful assistant should"
+max_new_tokens: 80
