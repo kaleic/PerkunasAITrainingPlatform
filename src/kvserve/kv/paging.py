@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import json
 import os
-import pickle
 import time
 import uuid
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
 
-from kvserve.kv.compression import SelectiveCompressedTensor
+import numpy as np
+
+from kvserve.kv.compression import CompressedSegment, CompressedTensor, SelectiveCompressedTensor
+from kvserve.models.schemas import KVCompressionMode
 
 
 class KVTier(StrEnum):
@@ -131,15 +134,123 @@ class KVPager:
     def _write_to_nvme(self, page: KVPage) -> None:
         if page.payload is None:
             return
-        path = self.nvme_dir / f"{page.page_id}.pkl"
+        path = self.nvme_dir / f"{page.page_id}.npz"
         tmp = path.with_suffix(".tmp")
         with tmp.open("wb") as fh:
-            pickle.dump(page.payload, fh, protocol=pickle.HIGHEST_PROTOCOL)
+            np.savez(fh, **_serialize_selective_tensor(page.payload))
         os.replace(tmp, path)
         page.path = path
 
     def _read_from_nvme(self, page: KVPage) -> SelectiveCompressedTensor:
         if page.path is None:
             raise RuntimeError(f"page {page.page_id} has no NVMe path")
-        with page.path.open("rb") as fh:
-            return pickle.load(fh)
+        with np.load(page.path, allow_pickle=False) as archive:
+            return _deserialize_selective_tensor(archive)
+
+
+def _serialize_selective_tensor(tensor: SelectiveCompressedTensor) -> dict[str, np.ndarray]:
+    arrays: dict[str, np.ndarray] = {}
+    manifest: dict[str, object] = {
+        "shape": list(tensor.shape),
+        "token_axis": tensor.token_axis,
+        "segments": [],
+    }
+    segments = manifest["segments"]
+    if not isinstance(segments, list):
+        raise TypeError("segments manifest must be a list")
+
+    for segment_index, segment in enumerate(tensor.segments):
+        prefix = f"segment_{segment_index}"
+        arrays[f"{prefix}_indices"] = np.asarray(segment.indices)
+        arrays[f"{prefix}_payload"] = np.frombuffer(segment.tensor.payload, dtype=np.uint8).copy()
+        metadata_manifest, metadata_arrays = _serialize_metadata(
+            segment.tensor.metadata, f"{prefix}_metadata"
+        )
+        arrays.update(metadata_arrays)
+        segments.append(
+            {
+                "indices": f"{prefix}_indices",
+                "precision_tier": segment.precision_tier,
+                "tensor": {
+                    "mode": str(segment.tensor.mode),
+                    "shape": list(segment.tensor.shape),
+                    "dtype": segment.tensor.dtype,
+                    "payload": f"{prefix}_payload",
+                    "metadata": metadata_manifest,
+                    "logical_nbytes": segment.tensor.logical_nbytes,
+                },
+            }
+        )
+
+    arrays["manifest"] = np.frombuffer(
+        json.dumps(manifest, separators=(",", ":")).encode("utf-8"), dtype=np.uint8
+    ).copy()
+    return arrays
+
+
+def _deserialize_selective_tensor(archive: np.lib.npyio.NpzFile) -> SelectiveCompressedTensor:
+    manifest = json.loads(bytes(np.asarray(archive["manifest"], dtype=np.uint8)).decode("utf-8"))
+    segments = []
+    for segment_manifest in manifest["segments"]:
+        tensor_manifest = segment_manifest["tensor"]
+        metadata = _deserialize_metadata(tensor_manifest["metadata"], archive)
+        tensor = CompressedTensor(
+            mode=KVCompressionMode(tensor_manifest["mode"]),
+            shape=tuple(int(dim) for dim in tensor_manifest["shape"]),
+            dtype=str(tensor_manifest["dtype"]),
+            payload=np.asarray(archive[tensor_manifest["payload"]], dtype=np.uint8).tobytes(),
+            metadata=metadata,
+            logical_nbytes=int(tensor_manifest["logical_nbytes"]),
+        )
+        segments.append(
+            CompressedSegment(
+                indices=np.asarray(archive[segment_manifest["indices"]]),
+                tensor=tensor,
+                precision_tier=segment_manifest["precision_tier"],
+            )
+        )
+    return SelectiveCompressedTensor(
+        shape=tuple(int(dim) for dim in manifest["shape"]),
+        token_axis=int(manifest["token_axis"]),
+        segments=segments,
+    )
+
+
+def _serialize_metadata(
+    metadata: dict[str, object], prefix: str
+) -> tuple[dict[str, object], dict[str, np.ndarray]]:
+    manifest: dict[str, object] = {}
+    arrays: dict[str, np.ndarray] = {}
+    for key, value in metadata.items():
+        array_key = f"{prefix}_{key}"
+        if isinstance(value, np.ndarray):
+            arrays[array_key] = value
+            manifest[key] = {"kind": "array", "key": array_key}
+        elif isinstance(value, np.generic):
+            manifest[key] = {"kind": "scalar", "value": value.item()}
+        elif isinstance(value, (str, int, float, bool)) or value is None:
+            manifest[key] = {"kind": "scalar", "value": value}
+        elif isinstance(value, (bytes, bytearray)):
+            arrays[array_key] = np.frombuffer(bytes(value), dtype=np.uint8).copy()
+            manifest[key] = {"kind": "bytes", "key": array_key}
+        else:
+            raise TypeError(f"unsupported KV page metadata value for {key!r}: {type(value).__name__}")
+    return manifest, arrays
+
+
+def _deserialize_metadata(
+    manifest: dict[str, object], archive: np.lib.npyio.NpzFile
+) -> dict[str, object]:
+    metadata: dict[str, object] = {}
+    for key, raw_entry in manifest.items():
+        entry = dict(raw_entry)
+        kind = entry["kind"]
+        if kind == "array":
+            metadata[key] = np.asarray(archive[entry["key"]])
+        elif kind == "scalar":
+            metadata[key] = entry["value"]
+        elif kind == "bytes":
+            metadata[key] = np.asarray(archive[entry["key"]], dtype=np.uint8).tobytes()
+        else:
+            raise ValueError(f"unsupported KV page metadata kind for {key!r}: {kind!r}")
+    return metadata
